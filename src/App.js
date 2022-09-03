@@ -14,7 +14,7 @@ function App() {
         <Header />
         <Routes>
           <Route exact path="/" element={<Home />} />
-          <Route exact path="/blog-details" element={<BlogDetails />} />
+          <Route exact path="/blog-details/:id" element={<BlogDetails />} />
           <Route path='*' element={<PageNotFound />} /> 
         </Routes>
         <Footer />

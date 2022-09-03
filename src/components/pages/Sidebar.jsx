@@ -2,8 +2,9 @@ import * as React from 'react';
 import SwipeableDrawer from '@mui/material/SwipeableDrawer';
 import List from '@mui/material/List';
 import SupportAgentIcon from '@mui/icons-material/SupportAgent';
-import { Box, Button, Grid, Rating, TextField, Typography } from '@mui/material'
-
+import { Alert, Box, Button, Grid, Rating, TextField, Typography } from '@mui/material'
+import { useState } from 'react';
+import axios from 'axios'
 export default function Sidebar({ login }) {
     const [state, setState] = React.useState({
         top: false,
@@ -15,6 +16,48 @@ export default function Sidebar({ login }) {
     const toggleDrawer = (anchor, open) => (event) => {
         setState({ ...state, [anchor]: open });
     };
+
+    const [msg, setMsg] = useState({
+        'status': false,
+        'type': '',
+        'message': '',
+    })
+    const [message, setMessage] = useState({
+        'name': '',
+        'email': '',
+        'phone': '',
+        'message': '',
+    })
+
+    const resetForm = () => {
+        setMessage({
+            'name': '',
+            'email': '',
+            'phone': '',
+            'message': '',
+        })
+    }
+
+    const handleInput = (e) => {
+        setMessage({
+            ...message, [e.target.name]: e.target.value
+        })
+    }
+    console.log(message);
+    const sendMessage = () => {
+        axios.post('http://localhost:4000/contact', message)
+            .then(response => {
+                if (response.data.Status === "Success") {
+                    setMsg({ status: true, msg: "Message Send Successfully", type: 'success' })
+                    resetForm()
+                } else if (response.data.Status === "Failed") {
+                    setMsg({ status: true, msg: "Message Send Failed", type: 'error' })
+                }
+            })
+            .catch(error => {
+                console.error('There was an error!', error);
+            });
+    }
 
     const list = (anchor) => (
         <Box p={2}
@@ -28,7 +71,7 @@ export default function Sidebar({ login }) {
                     <List>
                         <Typography sx={{ cursor: 'pointer' }} onClick={toggleDrawer(anchor, false)}>Login</Typography>
                         <Grid container spacing={2} mt={1}>
-                            
+
                             <Grid item xs={12}>
                                 <Box>
                                     <TextField
@@ -39,7 +82,6 @@ export default function Sidebar({ login }) {
                                     />
                                 </Box>
                             </Grid>
-
                             <Grid item xs={12}>
                                 <Box>
                                     <TextField
@@ -67,11 +109,12 @@ export default function Sidebar({ login }) {
                                         label="Name"
                                         id="outlined-size-small"
                                         size="small"
+                                        name='name'
+                                        value={message.name}
+                                        onChange={handleInput}
                                     />
                                 </Box>
                             </Grid>
-
-
 
                             <Grid item xs={12} md={6} >
                                 <Box>
@@ -80,6 +123,9 @@ export default function Sidebar({ login }) {
                                         label="Phone"
                                         id="outlined-size-small"
                                         size="small"
+                                        name='phone'
+                                        value={message.phone}
+                                        onChange={handleInput}
                                     />
                                 </Box>
                             </Grid>
@@ -91,6 +137,9 @@ export default function Sidebar({ login }) {
                                         label="Email"
                                         id="outlined-size-small"
                                         size="small"
+                                        name='email'
+                                        value={message.email}
+                                        onChange={handleInput}
                                     />
                                 </Box>
                             </Grid>
@@ -102,18 +151,26 @@ export default function Sidebar({ login }) {
                                         label="Message"
                                         multiline
                                         rows={4}
+                                        onChange={handleInput}
+                                        value={message.message}
+                                        name='message'
                                         placeholder="Write Your Message ..."
                                     />
                                 </Box>
                             </Grid>
 
                             <Grid item xs={12}>
-                                <Button variant="contained">Submit</Button>
+                                <Button variant="contained" onClick={() => sendMessage()}>Submit</Button>
+                            </Grid>
+                            <Grid item xs={12}>
+                                {
+                                    msg.status ? <Alert severity={msg.type}>{msg.msg}</Alert> : ''
+                                }
                             </Grid>
                         </Grid>
                     </List>
             }
-        </Box>
+        </Box >
     );
 
     return (

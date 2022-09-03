@@ -5,6 +5,10 @@ import Box from '@mui/material/Box';
 import Paper from '@mui/material/Paper';
 import moment from 'moment';
 import { Stack } from '@mui/system';
+import { useParams } from 'react-router-dom';
+import axios from 'axios';
+import { useState, useEffect } from 'react';
+import { timeAgo } from '../Utility/Date';
 const BlogDetails = () => {
     const Item = styled(Paper)(({ theme }) => ({
         backgroundColor: theme.palette.mode === 'dark' ? '#1A2027' : '#fff',
@@ -14,6 +18,22 @@ const BlogDetails = () => {
         color: theme.palette.text.secondary,
     }));
     const date = new Date().toString()
+
+    const [blogDateils, setBlogDetails] = useState({})
+    const { id } = useParams()
+    useEffect(() => {
+        getBlog()
+    }, [id])
+    const getBlog = () => {
+        axios.get(`http://localhost:4000/blog/${id}`)
+            .then(response => {
+                console.log('response', response.data.data)
+                setBlogDetails(response.data.data)
+            })
+            .catch(error => {
+                console.error('There was an error!', error);
+            });
+    }
     return (
         <>
             <Box sx={{ flexGrow: 1 }} mt={4}>
@@ -23,20 +43,21 @@ const BlogDetails = () => {
                             <Grid item xs={12} md={6}>
 
                                 <Item>
-                                    <img src="https://cdn.pixabay.com/photo/2018/09/11/16/12/books-3669911_960_720.jpg" />
+                                    <img src={`http://127.0.0.1:4000/${blogDateils.img}`} />
                                     <Typography variant="h5" component="div">
-                                        Blog Title
+                                        {blogDateils.title}
                                     </Typography>
                                     <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
                                         <Typography mt={1} >
-                                            Uploaded Date : {moment(date).format("DD-MM-YYYY HH:mm")}
+                                            {/* Uploaded Date : {moment(blogDateils.uploadDate).format("DD-MM-YYYY HH:mm")} */}
+                                            Uploaded Date : {timeAgo(blogDateils.uploadDate)}
                                         </Typography>
                                         <Stack spacing={1} mt={1}>
                                             <Rating name="half-rating-read" defaultValue={2.5} precision={0.5} readOnly />
                                         </Stack>
                                     </Box>
                                     <Typography mt={1} >
-                                        Uploaded By : Deepak Gupta
+                                        Uploaded By : {blogDateils.uploadBy}
                                     </Typography>
                                 </Item>
 
@@ -44,27 +65,15 @@ const BlogDetails = () => {
                             <Grid item xs={12} md={6}>
                                 <Item>
                                     <Typography variant="h5" component="div">
-                                        Blog Title
+                                        {blogDateils.title}
                                     </Typography>
                                     <Typography variant="p" component="div">
-                                        What perspective do you bring that makes you stand out from the crowd? This is key to determining the trajectory of your blog’s future and there’s many avenues to choose in the process.
-                                        What perspective do you bring that makes you stand out from the crowd? This is key to determining the trajectory of your blog’s future and there’s many avenues to choose in the process.
-                                        What perspective do you bring that makes you stand out from the crowd? This is key to determining the trajectory of your blog’s future and there’s many avenues to choose in the process.
-                                        What perspective do you bring that makes you stand out from the crowd? This is key to determining the trajectory of your blog’s future and there’s many avenues to choose in the process.
+                                        {blogDateils.desc}
+
                                     </Typography>
 
                                     <Typography variant="p" component="div" mt={3}>
-                                        What perspective do you bring that makes you stand out from the crowd? This is key to determining the trajectory of your blog’s future and there’s many avenues to choose in the process.
-                                        What perspective do you bring that makes you stand out from the crowd? This is key to determining the trajectory of your blog’s future and there’s many avenues to choose in the process.
-                                        What perspective do you bring that makes you stand out from the crowd? This is key to determining the trajectory of your blog’s future and there’s many avenues to choose in the process.
-                                        What perspective do you bring that makes you stand out from the crowd? This is key to determining the trajectory of your blog’s future and there’s many avenues to choose in the process.
-                                    </Typography>
-
-                                    <Typography variant="p" component="div" mt={3}>
-                                        What perspective do you bring that makes you stand out from the crowd? This is key to determining the trajectory of your blog’s future and there’s many avenues to choose in the process.
-                                        What perspective do you bring that makes you stand out from the crowd? This is key to determining the trajectory of your blog’s future and there’s many avenues to choose in the process.
-                                        What perspective do you bring that makes you stand out from the crowd? This is key to determining the trajectory of your blog’s future and there’s many avenues to choose in the process.
-                                        What perspective do you bring that makes you stand out from the crowd? This is key to determining the trajectory of your blog’s future and there’s many avenues to choose in the process.
+                                        {blogDateils.sort_desc}
                                     </Typography>
 
                                 </Item>
@@ -75,8 +84,8 @@ const BlogDetails = () => {
 
                 <Grid container justifyContent='center' my={3}>
                     <Grid item xs={10}>
-                        <Item sx={{p: 2}}>
-                            <Box sx={{ textAlign: 'center'}}  component='h2'>Feedback</Box>
+                        <Item sx={{ p: 2 }}>
+                            <Box sx={{ textAlign: 'center' }} component='h2'>Feedback</Box>
                             <Box>
                                 <Stack direction="row" sx={{ mt: 2 }}>
                                     <Avatar alt="Remy Sharp" src="https://upload.wikimedia.org/wikipedia/commons/thumb/0/05/Ashok_Gehlot.jpg/220px-Ashok_Gehlot.jpg" />

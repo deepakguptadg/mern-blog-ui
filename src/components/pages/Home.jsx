@@ -6,6 +6,10 @@ import Paper from '@mui/material/Paper';
 import moment from 'moment';
 import { Stack } from '@mui/system';
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
+import { useEffect } from 'react';
+import { useState } from 'react';
+import { timeAgo } from '../Utility/Date';
 const Home = () => {
     const Item = styled(Paper)(({ theme }) => ({
         backgroundColor: theme.palette.mode === 'dark' ? '#1A2027' : '#fff',
@@ -16,9 +20,33 @@ const Home = () => {
     }));
     const date = new Date().toString()
     const navigate = useNavigate()
-    const blogDetails = () => {
-        navigate('/blog-details')
+    const blogDetails = (id) => {
+        navigate(`/blog-details/${id}`)
     }
+
+    const [blogList, setBlogList] = useState([])
+
+    useEffect(() => {
+        getBlog()
+    }, [])
+
+
+    const getBlog = () => {
+        axios.get('http://localhost:4000/blog/get-blog')
+            .then(response => {
+                setBlogList(response.data.data)
+            })
+            .catch(error => {
+                console.error('There was an error!', error);
+            });
+    }
+
+
+    console.log('blogList', blogList)
+
+    // const getDate = timeAgo()
+
+    
     return (
 
         <>
@@ -26,8 +54,32 @@ const Home = () => {
                 <Grid container spacing={2} justifyContent="center">
                     <Grid item xs={10}>
                         <Grid container spacing={2}>
-                            <Grid item xs={12} md={6} lg={4}>
-                                <Item onClick={()=>blogDetails()}>
+
+                            {
+                                blogList?.map((data, i) => (
+                                    <Grid item xs={12} md={6} lg={4}>
+                                        <Item onClick={() => blogDetails(data._id)}>
+                                            <img src={`http://127.0.0.1:4000/${data.img}`} />
+                                            <Typography variant="h5" component="div">
+                                                {data.title}
+                                            </Typography>
+                                            <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                                                <Typography mt={1} >
+                                                    {/* Uploaded Date : {moment(data.uploadDate).format("DD-MM-YYYY HH:mm")} */}
+                                                    Uploaded Date :{timeAgo(data.uploadDate)}
+
+                                                </Typography>
+                                                <Stack spacing={1} mt={1}>
+                                                    <Rating name="half-rating-read" defaultValue={2.5} precision={0.5} readOnly />
+                                                </Stack>
+                                            </Box>
+                                        </Item>
+                                    </Grid>
+                                ))
+                            }
+
+                            {/* <Grid item xs={12} md={6} lg={4}>
+                                <Item onClick={() => blogDetails()}>
                                     <img src="https://cdn.pixabay.com/photo/2018/09/11/16/12/books-3669911_960_720.jpg" />
                                     <Typography variant="h5" component="div">
                                         Blog Title
@@ -41,57 +93,9 @@ const Home = () => {
                                         </Stack>
                                     </Box>
                                 </Item>
-                            </Grid>
-                            <Grid item xs={12} md={6} lg={4}>
-                                <Item>
-                                    <img src="https://cdn.pixabay.com/photo/2016/07/29/08/55/chalk-1551571_960_720.jpg" />
-                                    <Typography variant="h5" component="div">
-                                        Blog Title
-                                    </Typography>
-                                    <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                                        <Typography mt={1} >
-                                            Uploaded Date : {moment(date).format("DD-MM-YYYY HH:mm")}
-                                        </Typography>
-                                        <Stack spacing={1} mt={1}>
-                                            <Rating name="half-rating-read" defaultValue={2.5} precision={0.5} readOnly />
-                                        </Stack>
-                                    </Box>
-                                </Item>
-                            </Grid>
+                            </Grid> */}
 
-                            <Grid item xs={12} md={6} lg={4}>
-                                <Item>
-                                    <img src="https://images.unsplash.com/photo-1661794465928-22538f665d87?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=856&q=80" />
-                                    <Typography variant="h5" component="div">
-                                        Blog Title
-                                    </Typography>
-                                    <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                                        <Typography mt={1} >
-                                            Uploaded Date : {moment(date).format("DD-MM-YYYY HH:mm")}
-                                        </Typography>
-                                        <Stack spacing={1} mt={1}>
-                                            <Rating name="half-rating-read" defaultValue={2.5} precision={0.5} readOnly />
-                                        </Stack>
-                                    </Box>
-                                </Item>
-                            </Grid>
 
-                            <Grid item xs={12} md={6} lg={4}>
-                                <Item>
-                                    <img src="https://media.istockphoto.com/id/1131005373/photo/kitchen-fresh-colorful-organic-vegetables-on-worktop.webp?s=612x612&w=is&k=20&c=JHMp0RFHlyZfYpaYAs525DseEPB_Sy05dlQhtvmPK2E=" />
-                                    <Typography variant="h5" component="div">
-                                        Blog Title
-                                    </Typography>
-                                    <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                                        <Typography mt={1} >
-                                            Uploaded Date : {moment(date).format("DD-MM-YYYY HH:mm")}
-                                        </Typography>
-                                        <Stack spacing={1} mt={1}>
-                                            <Rating name="half-rating-read" defaultValue={2.5} precision={0.5} readOnly />
-                                        </Stack>
-                                    </Box>
-                                </Item>
-                            </Grid>
 
                         </Grid>
                     </Grid>
