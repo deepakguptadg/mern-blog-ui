@@ -10,7 +10,7 @@ import axios from 'axios';
 import { useEffect } from 'react';
 import { useState } from 'react';
 import { timeAgo } from '../Utility/Date';
-const Home = () => {
+const Home = ({Header}) => {
     const Item = styled(Paper)(({ theme }) => ({
         backgroundColor: theme.palette.mode === 'dark' ? '#1A2027' : '#fff',
         ...theme.typography.body2,
@@ -50,6 +50,7 @@ const Home = () => {
     return (
 
         <>
+            <Header />
             <Box sx={{ flexGrow: 1 }} my={4}>
                 <Grid container spacing={2} justifyContent="center">
                     <Grid item xs={10}>

@@ -5,11 +5,11 @@ import Box from '@mui/material/Box';
 import Paper from '@mui/material/Paper';
 import moment from 'moment';
 import { Stack } from '@mui/system';
-import { useParams } from 'react-router-dom';
+import { useParams, useLocation } from 'react-router-dom';
 import axios from 'axios';
 import { useState, useEffect } from 'react';
 import { timeAgo } from '../Utility/Date';
-const BlogDetails = () => {
+const BlogDetails = ({ Header }) => {
     const Item = styled(Paper)(({ theme }) => ({
         backgroundColor: theme.palette.mode === 'dark' ? '#1A2027' : '#fff',
         ...theme.typography.body2,
@@ -34,8 +34,12 @@ const BlogDetails = () => {
                 console.error('There was an error!', error);
             });
     }
+    const [msg, setMessage] = useState()
+    console.log(msg)
     return (
         <>
+
+            <Header />
             <Box sx={{ flexGrow: 1 }} mt={4}>
                 <Grid container spacing={2} justifyContent="center">
                     <Grid item xs={10}>
@@ -99,7 +103,7 @@ const BlogDetails = () => {
                                     </Box>
                                 </Stack>
                                 <Stack direction="row" sx={{ mt: 2 }}>
-                                    <Avatar alt="Remy Sharp" src="/static/images/avatar/1.jpg" />
+                                    <Avatar alt="Remy Sharp" src="" />
                                     <Box>
                                         <Typography ml={1} variant="p" sx={{ fontWeight: 'bold' }}>Rahul Singh</Typography>
                                         <Typography ml={1} variant="p" component="p">
@@ -119,27 +123,29 @@ const BlogDetails = () => {
                                     </Box>
                                 </Stack>
                             </Box>
-
-                            <Box
-                                component="form"
-                                sx={{
-                                    '& .MuiTextField-root': { mt: 3, width: '100%' },
-                                }}
-                                noValidate
-                                autoComplete="off"
-                            >
-                                <TextField
-                                    id="outlined-multiline-static"
-                                    label="Write Your Comments"
-                                    multiline
-                                    rows={3}
-                                    // defaultValue="Write Your Comments ..."
-                                    placeholder="Write Your Comments ..."
-                                />
-                                <Button variant="contained" sx={{ mt: 1 }}>Give Feedback</Button>
-
-                            </Box>
+                            
                         </Item>
+                        <Box
+                            component="form"
+                            sx={{
+                                '& .MuiTextField-root': { mt: 3, width: '100%' },
+                            }}
+                            noValidate
+                            autoComplete="off"
+                        >
+                            <TextField
+                                id="outlined-multiline-static"
+                                label="Write Your Comments"
+                                multiline
+                                rows={3}
+                                // defaultValue="Write Your Comments ..."
+                                onChange={(e) => { setMessage(e.target.value) }}
+                                value={msg}
+                                placeholder="Write Your Comments ..."
+                            />
+                            <Button variant="contained" sx={{ mt: 1 }}>Give Feedback</Button>
+
+                        </Box>
                     </Grid>
                 </Grid>
             </Box>
