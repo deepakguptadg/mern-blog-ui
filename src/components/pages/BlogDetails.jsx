@@ -1,14 +1,15 @@
-import { Avatar, Button, Grid, Rating, TextField, Typography } from '@mui/material'
+import { Avatar, Button, Grid, Rating, TextField, Typography, Modal } from '@mui/material'
 import React from 'react'
 import { styled } from '@mui/material/styles';
 import Box from '@mui/material/Box';
 import Paper from '@mui/material/Paper';
-import moment from 'moment';
 import { Stack } from '@mui/system';
 import { useParams, useLocation } from 'react-router-dom';
 import axios from 'axios';
 import { useState, useEffect } from 'react';
-import { timeAgo } from '../Utility/Date';
+import { timeAgo } from '../../Utility/Date';
+import { apiBaseUrl } from '../../Utility/Constant';
+import { useContextDataProvider } from '../../Context/ContextDataProvider';
 const BlogDetails = ({ Header }) => {
     const Item = styled(Paper)(({ theme }) => ({
         backgroundColor: theme.palette.mode === 'dark' ? '#1A2027' : '#fff',
@@ -20,25 +21,73 @@ const BlogDetails = ({ Header }) => {
     const date = new Date().toString()
 
     const [blogDateils, setBlogDetails] = useState({})
+
+    const {getfeedbackfun, feedbacklist, totalRatting} = useContextDataProvider()
+
     const { id } = useParams()
     useEffect(() => {
         getBlog()
+        getfeedbackfun(id)
     }, [id])
     const getBlog = () => {
-        axios.get(`http://localhost:4000/blog/${id}`)
+        axios.get(apiBaseUrl + `/blog/${id}`)
             .then(response => {
-                console.log('response', response.data.data)
                 setBlogDetails(response.data.data)
             })
             .catch(error => {
                 console.error('There was an error!', error);
             });
     }
-    const [msg, setMessage] = useState()
-    console.log(msg)
+
+    const style = {
+        position: 'absolute',
+        top: '50%',
+        left: '50%',
+        transform: 'translate(-50%, -50%)',
+        width: 300,
+        bgcolor: 'background.paper',
+        border: '1px solid #000',
+        boxShadow: 24,
+        p: 4,
+        borderRadius: '6px'
+    }
+
+    const [open, setOpen] = useState(false)
+    const handleClose = () => setOpen(false)
+    const [feedbackVal, setFeedbackVal] = useState({
+        'blogId': id,
+        'userId': 1,
+        'feedback': '',
+        'starCount': ''
+    })
+
+    const handleOpen = () => {
+        if (feedbackVal.feedback.length < 1) {
+            setOpen(false)
+        } else {
+            setOpen(true)
+        }
+    }
+    const FeedbackSubmit = () => {
+        axios.post(apiBaseUrl + '/feedback', feedbackVal)
+            .then(response => {
+                if (response.data.Status === "Success") {
+                    setOpen(false)
+                    alert('Thank You !! You Give Feedback Succesfully !!')
+                    setFeedbackVal({ ...feedbackVal, 'feedback': '' })
+                } else if (response.data.Status === "Failed") {
+                    alert("Sorry !! You Can't Give Feedback !!")
+                }
+            })
+            .catch(error => {
+                console.error('There was an error!', error);
+            });
+    }
+    
+
+
     return (
         <>
-
             <Header />
             <Box sx={{ flexGrow: 1 }} mt={4}>
                 <Grid container spacing={2} justifyContent="center">
@@ -56,9 +105,10 @@ const BlogDetails = ({ Header }) => {
                                             {/* Uploaded Date : {moment(blogDateils.uploadDate).format("DD-MM-YYYY HH:mm")} */}
                                             Uploaded Date : {timeAgo(blogDateils.uploadDate)}
                                         </Typography>
-                                        <Stack spacing={1} mt={1}>
-                                            <Rating name="half-rating-read" defaultValue={2.5} precision={0.5} readOnly />
+                                        <Stack spacing={1} mt={1} sx={{ display: 'flex' }}>
+                                            <Rating name="half-rating-read" defaultValue={totalRatting} precision={0.5} readOnly />
                                         </Stack>
+                                        <Typography pt={1}>{totalRatting} +</Typography>
                                     </Box>
                                     <Typography mt={1} >
                                         Uploaded By : {blogDateils.uploadBy}
@@ -91,39 +141,27 @@ const BlogDetails = ({ Header }) => {
                         <Item sx={{ p: 2 }}>
                             <Box sx={{ textAlign: 'center' }} component='h2'>Feedback</Box>
                             <Box>
-                                <Stack direction="row" sx={{ mt: 2 }}>
-                                    <Avatar alt="Remy Sharp" src="https://upload.wikimedia.org/wikipedia/commons/thumb/0/05/Ashok_Gehlot.jpg/220px-Ashok_Gehlot.jpg" />
-                                    <Box>
-                                        <Typography ml={1} variant="p" sx={{ fontWeight: 'bold' }}>Ashok Gahlot</Typography>
-                                        <Typography ml={1} variant="p" component="p">
-                                            Lorem ipsum dolor sit amet consectetur adipisicing elit. Blanditiis error quo aspernatur eos corporis quas, ut accusamus qui velit iusto?
-                                            Lorem ipsum dolor sit amet consectetur adipisicing elit. Blanditiis error quo aspernatur eos corporis quas, ut accusamus qui velit iusto?
-                                            Lorem ipsum dolor sit amet consectetur adipisicing elit. Blanditiis error quo aspernatur eos corporis quas, ut accusamus qui velit iusto?
-                                        </Typography>
-                                    </Box>
-                                </Stack>
-                                <Stack direction="row" sx={{ mt: 2 }}>
-                                    <Avatar alt="Remy Sharp" src="" />
-                                    <Box>
-                                        <Typography ml={1} variant="p" sx={{ fontWeight: 'bold' }}>Rahul Singh</Typography>
-                                        <Typography ml={1} variant="p" component="p">
-                                            Lorem ipsum dolor sit amet consectetur adipisicing elit. Blanditiis error quo aspernatur eos corporis quas, ut accusamus qui velit iusto?
-                                        </Typography>
-                                    </Box>
-                                </Stack>
 
-
-                                <Stack direction="row" sx={{ mt: 2 }}>
-                                    <Avatar alt="Remy Sharp" src="https://avatars.githubusercontent.com/u/81194614?v=4" />
-                                    <Box>
-                                        <Typography ml={1} variant="p" sx={{ fontWeight: 'bold' }}>Praveen</Typography>
-                                        <Typography ml={1} variant="p" component="p">
-                                            Lorem ipsum dolor sit amet consectetur adipisicing elit. Blanditiis error quo aspernatur eos corporis quas, ut accusamus qui velit iusto?Lorem ipsum dolor sit amet consectetur adipisicing elit. Blanditiis error quo aspernatur eos corporis quas, ut accusamus qui velit iusto?
-                                        </Typography>
-                                    </Box>
-                                </Stack>
+                                {
+                                    feedbacklist ?
+                                        feedbacklist.map((data, i) => {
+                                            return <>
+                                                <Stack direction="row" sx={{ mt: 2 }}>
+                                                    <Avatar alt="Remy Sharp" src="" />
+                                                    <Box>
+                                                        <Typography ml={1} variant="p" sx={{ fontWeight: 'bold' }}>Ashok Gahlot </Typography>
+                                                        <Typography ml={1} variant="p" sx={{ fontSize: '11px' }}>{timeAgo(data.feedbackDate)}</Typography>
+                                                        <Typography ml={1} variant="p" component="p">
+                                                            {data.feedback}
+                                                        </Typography>
+                                                    </Box>
+                                                </Stack>
+                                            </>
+                                        })
+                                        : ''
+                                }
                             </Box>
-                            
+
                         </Item>
                         <Box
                             component="form"
@@ -134,21 +172,36 @@ const BlogDetails = ({ Header }) => {
                             autoComplete="off"
                         >
                             <TextField
-                                id="outlined-multiline-static"
                                 label="Write Your Comments"
-                                multiline
-                                rows={3}
+                                fullWidth
                                 // defaultValue="Write Your Comments ..."
-                                onChange={(e) => { setMessage(e.target.value) }}
-                                value={msg}
+                                onChange={(e) => setFeedbackVal({ ...feedbackVal, 'feedback': e.target.value })}
+                                value={feedbackVal.feedback}
                                 placeholder="Write Your Comments ..."
                             />
-                            <Button variant="contained" sx={{ mt: 1 }}>Give Feedback</Button>
+                            <Button variant="contained" sx={{ mt: 1 }} onClick={handleOpen}>Give Feedback</Button>
 
                         </Box>
                     </Grid>
                 </Grid>
             </Box>
+
+            <Modal open={open} onClose={handleClose} aria-labelledby="modal-modal-title">
+                <Box sx={style}>
+                    <Typography sx={{ mx: 2, textAlign: 'center' }}>
+                        <Box sx={{}}>
+                            <Rating
+                                value={feedbackVal.starCount}
+                                onChange={(event, newValue) => {
+                                    setFeedbackVal({ ...feedbackVal, 'starCount': newValue })
+                                }}
+                                size="large"
+                            />
+                        </Box>
+                        <Button size='small' variant="contained" sx={{ mt: 2 }} onClick={() => FeedbackSubmit()}>Submit</Button>
+                    </Typography>
+                </Box>
+            </Modal>
         </>
     )
 }

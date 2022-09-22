@@ -9,8 +9,10 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { useEffect } from 'react';
 import { useState } from 'react';
-import { timeAgo } from '../Utility/Date';
-const Home = ({Header}) => {
+import { timeAgo } from '../../Utility/Date';
+import { apiBaseUrl } from '../../Utility/Constant';
+import { useContextDataProvider } from '../../Context/ContextDataProvider';
+const Home = ({ Header }) => {
     const Item = styled(Paper)(({ theme }) => ({
         backgroundColor: theme.palette.mode === 'dark' ? '#1A2027' : '#fff',
         ...theme.typography.body2,
@@ -18,6 +20,7 @@ const Home = ({Header}) => {
         // textAlign: 'center',
         color: theme.palette.text.secondary,
     }));
+    const {totalRatting} = useContextDataProvider()
     const date = new Date().toString()
     const navigate = useNavigate()
     const blogDetails = (id) => {
@@ -32,7 +35,7 @@ const Home = ({Header}) => {
 
 
     const getBlog = () => {
-        axios.get('http://localhost:4000/blog/get-blog')
+        axios.get(apiBaseUrl + '/blog/get-blog')
             .then(response => {
                 setBlogList(response.data.data)
             })
@@ -41,12 +44,9 @@ const Home = ({Header}) => {
             });
     }
 
-
     console.log('blogList', blogList)
 
-    // const getDate = timeAgo()
 
-    
     return (
 
         <>
@@ -57,26 +57,32 @@ const Home = ({Header}) => {
                         <Grid container spacing={2}>
 
                             {
-                                blogList?.map((data, i) => (
-                                    <Grid item xs={12} md={6} lg={4}>
-                                        <Item onClick={() => blogDetails(data._id)}>
-                                            <img src={`http://127.0.0.1:4000/${data.img}`} />
-                                            <Typography variant="h5" component="div">
-                                                {data.title}
-                                            </Typography>
-                                            <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                                                <Typography mt={1} >
-                                                    {/* Uploaded Date : {moment(data.uploadDate).format("DD-MM-YYYY HH:mm")} */}
-                                                    Uploaded Date :{timeAgo(data.uploadDate)}
-
+                                blogList.length > 0 ?
+                                    blogList?.map((data, i) => (
+                                        <Grid item xs={12} md={6} lg={4}>
+                                            <Item onClick={() => blogDetails(data._id)}>
+                                                <img src={`http://127.0.0.1:4000/${data.img}`} />
+                                                <Typography variant="h5" component="div">
+                                                    {data.title}
                                                 </Typography>
-                                                <Stack spacing={1} mt={1}>
-                                                    <Rating name="half-rating-read" defaultValue={2.5} precision={0.5} readOnly />
-                                                </Stack>
-                                            </Box>
-                                        </Item>
-                                    </Grid>
-                                ))
+                                                <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                                                    <Typography mt={1} >
+                                                        {/* Uploaded Date : {moment(data.uploadDate).format("DD-MM-YYYY HH:mm")} */}
+                                                        Uploaded Date :{timeAgo(data.uploadDate)}
+
+                                                    </Typography>
+                                                    {/* <Stack spacing={1} mt={1}>
+                                                        <Rating name="half-rating-read" defaultValue={totalRatting} precision={0.5} readOnly />
+                                                    </Stack> */}
+                                                </Box>
+                                            </Item>
+                                        </Grid>
+                                    ))
+                                    :
+                                    <Typography variant="h5" component="div">
+                                        No Blog to Dispay
+                                    </Typography>
+
                             }
 
                             {/* <Grid item xs={12} md={6} lg={4}>
